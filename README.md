@@ -54,7 +54,7 @@
 <a href="docs/">QA Documentation </a>
 
 
-<a href="docs/">Team Documentation </a>
+<a href="docs/">Documentation </a>
 
 
 <a href="docs/">Presentation </a>
