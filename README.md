@@ -1,17 +1,16 @@
 <h1 align="center">Team DAVS</h1>
 
 <p align="center">
-        <img src=""/>
-        <img src=""/>
+        
 </p>
 
 ## 🧒 Our Team
 
 <b>
-<a href = “https://github.com/SGSkuliev21> 🟨 Stoyan Skuliev [ Scrum Trainer ] </a><br>
+<a href = “https://github.com/SGSkuliev21> 🟨 Angel Angelov [ QA Developer ] </a><br>
 <a href=“https://github.com/DKByandov21”> 🟥 Dimitar Byandov [ Fronted Developer ] </a><br>
 <a href=“https://github.com/VDVichev21”> 🟩 Vicho Vichev [ Backend Developer ] </a><br>
-<a href =“https://github.com/AHAngelov21”> 🟦 Angel Angelov [ QA Developer ] </a> 
+<a href =“https://github.com/AHAngelov21”> 🟦 Stoyan Skuliev [ Scrum Trainer ] </a> 
 </b>
 
 ## 💻 About
