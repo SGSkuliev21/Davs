@@ -7,7 +7,7 @@
 ## 🧒 Our Team
 
 <b>
-<a href = “https://github.com/SGSkuliev21> 🟨 Angel Angelov [ QA Developer ] </a><br>
+<a href = “https://github.com/SGSkuliev21> 🟨 Angel Angelov [ Backend Developer ] </a><br>
 <a href=“https://github.com/DKByandov21”> 🟥 Dimitar Byandov [ Fronted Developer ] </a><br>
 <a href=“https://github.com/VDVichev21”> 🟩 Vicho Vichev [ Backend Developer ] </a><br>
 <a href =“https://github.com/AHAngelov21”> 🟦 Stoyan Skuliev [ Scrum Trainer ] </a> 
@@ -65,5 +65,5 @@
 
 ## 📩 How to Install
 
-<p>To install the repostory, you have to type this 👇 in CMD.
+<p>To install the repository, you have to type this 👇 in CMD.
 <pre>git clone https://github.com/SGSkuliev21/Davs.git</pre>
