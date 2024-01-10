@@ -21,9 +21,10 @@ struct User {
 
 class BankSimulation {
 public:
-    static const int MAX_TEXT_BUFFER_LENGTH = 64;
-    char usernameBuffer[100] = "";
-    char passwordBuffer[100] = "";
+    static const int MAX_TEXT_BUFFER_LENGTH = 16; // Change maximum length to 16 characters
+    char usernameBuffer[MAX_TEXT_BUFFER_LENGTH + 1] = ""; // +1 for null-terminator
+    char passwordBuffer[MAX_TEXT_BUFFER_LENGTH + 1] = ""; // +1 for null-terminator
+
     void SaveUser(const std::string& username, const std::string& password);
     bool AuthenticateUser(const std::string& username, const std::string& password);
     bool isConfirmingUsername = false;
@@ -64,7 +65,6 @@ public:
 
             EndDrawing();
         }
-
     }
 
 private:
@@ -77,9 +77,8 @@ private:
         const int screenHeight = GetScreenHeight();
 
         DrawText("Welcome to Davs", screenWidth / 2 - MeasureText("Welcome to Davs", 40) / 2, screenHeight / 7, 40, BLACK);
-        DrawText("Enter your username and password", screenWidth / 2 - MeasureText("Enter your username and password", 20)/4.5, screenHeight / 5, 10, BLACK);
+        DrawText("Enter your username and password", screenWidth / 2 - MeasureText("Enter your username and password", 20) / 4.5, screenHeight / 5, 10, BLACK);
 
-        
         DrawTextBox("Username:", screenWidth / 4 + 107, screenHeight / 2 - 100, 200, usernameBuffer);
         DrawTextBox("Password:", screenWidth / 2 - 93, 265, 200, passwordBuffer, true);
 
@@ -97,22 +96,26 @@ private:
             CheckCollisionPointRec(GetMousePosition(), { (float)(screenWidth / 2 - MeasureText("Create account", 20) / 2), (float)(screenHeight / 2 + 140), (float)MeasureText("Create account", 20), 20 })) {
             currentScreen = REGISTER;
             usernameBuffer[0] = '\0';
+            passwordBuffer[0] = '\0';
         }
     }
 
     void DrawRegister() {
         DrawText("Register", 50, 50, 30, BLACK);
 
-        DrawTextBox("Username:", 50, 150, 200, usernameBuffer);
+        static bool isEnteringUsername = true;
 
-        // If Enter is pressed, switch to entering password state
-        if (IsKeyPressed(KEY_ENTER)) {
-            isEnteringPassword = true;
-            // Clear password buffer when switching to the password state
-            passwordBuffer[0] = '\0';
+        if (isEnteringUsername) {
+            DrawTextBox("Username:", 50, 150, 200, usernameBuffer);
+
+            // Check if the username text box is full
+            if (strlen(usernameBuffer) >= MAX_TEXT_BUFFER_LENGTH) {
+                isEnteringUsername = false;
+                // Clear password buffer when switching to the password state
+                passwordBuffer[0] = '\0';
+            }
         }
-
-        if (isEnteringPassword) {
+        else {
             DrawTextBox("Password:", 50, 200, 200, passwordBuffer, true);
 
             if (Button("Register", 50, 300, 200)) {
@@ -131,13 +134,11 @@ private:
             // Reset both username and password buffers when returning to the main menu
             usernameBuffer[0] = '\0';
             passwordBuffer[0] = '\0';
-            // Reset the state to entering username
-            isEnteringPassword = false;
+            isEnteringUsername = true; // Reset the state to entering username
         }
     }
 
-    void DrawLogin() 
-    {
+    void DrawLogin() {
         static bool isEnteringPassword = false;
         static bool isConfirmingUsername = false;
         static std::string confirmedUsername;  // Store the confirmed username
@@ -177,11 +178,9 @@ private:
                 usernameBuffer[0] = '\0';
                 isConfirmingUsername = false;
                 confirmedUsername.clear();
-                
             }
         }
     }
- 
 
     void DrawUserMenu() {
         DrawText("User Menu", 50, 50, 30, BLACK);
@@ -230,31 +229,42 @@ private:
         DrawRectangleRec(textBoxRect, LIGHTGRAY);
         DrawRectangleLinesEx(textBoxRect, 2, BLACK);
 
-        // Update buffer with input text
-        int len = strlen(buffer);
-        int key = GetKeyPressed();
-        if (len < MAX_TEXT_BUFFER_LENGTH - 1) {
-            if (IsKeyPressed(KEY_BACKSPACE) && len > 0) {
-                // Handle backspace
-                buffer[len - 1] = '\0';
-            }
-            else if (key >= 32 && key <= 125) {
-                // Handle regular characters
-                buffer[len] = static_cast<char>(key);
-                buffer[len + 1] = '\0';
+        if (CheckCollisionPointRec(GetMousePosition(), textBoxRect)) {
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                activeTextBox = buffer;
             }
         }
 
-        // Draw asterisks for password input
-        if (isPassword) {
-            DrawText((len > 0) ? "*" : "", x + 10, y + 40, 20, BLACK);
-        }
-        else {
-            // Draw the text inside the buffer
-            DrawText(buffer, x + 10, y + 40, 20, BLACK);
+        if (activeTextBox == buffer) {
+            // Update buffer with input text
+            int len = strlen(buffer);
+            int key = GetKeyPressed();
+            if (len < MAX_TEXT_BUFFER_LENGTH - 1) {
+                if (IsKeyPressed(KEY_BACKSPACE) && len > 0) {
+                    // Handle backspace
+                    buffer[len - 1] = '\0';
+                }
+                else if (key >= 32 && key <= 125) {
+                    // Handle regular characters
+                    buffer[len] = static_cast<char>(key);
+                    buffer[len + 1] = '\0';
+                }
+            }
+
+            // Draw asterisks for password input
+            if (isPassword) {
+                DrawText((len > 0) ? "*" : "", x + 10, y + 40, 20, BLACK);
+            }
+            else {
+                // Draw the text inside the buffer
+                DrawText(buffer, x + 10, y + 40, 20, BLACK);
+            }
         }
     }
+
+    std::string activeTextBox;  // Track the active text box
 };
+
 void BankSimulation::SaveUser(const std::string& username, const std::string& password) {
     std::ofstream file("users.txt", std::ios::app);  // Open file in append mode
     if (file.is_open()) {
@@ -280,6 +290,7 @@ bool BankSimulation::AuthenticateUser(const std::string& username, const std::st
     }
     return false;  // User not found or authentication failed
 }
+
 int main() {
     BankSimulation bank;
     bank.Run();
