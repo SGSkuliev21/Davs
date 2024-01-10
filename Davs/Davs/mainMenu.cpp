@@ -15,7 +15,7 @@
 //}
 //
 ////bool MainMenu::CheckRegisterPressed() const 
-//{
+//{  
 //    //////return IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(GetMousePosition(), registerButton);
 //}
 //

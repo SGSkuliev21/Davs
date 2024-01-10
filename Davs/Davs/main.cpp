@@ -1,5 +1,6 @@
 #include "raylib.h"
 #include <string>
+#include <fstream> 
 
 enum Screen {
     MAIN_MENU,
@@ -23,10 +24,12 @@ public:
     static const int MAX_TEXT_BUFFER_LENGTH = 64;
     char usernameBuffer[100] = "";
     char passwordBuffer[100] = "";
+    void SaveUser(const std::string& username, const std::string& password);
+    bool AuthenticateUser(const std::string& username, const std::string& password);
     bool isConfirmingUsername = false;
     std::string confirmedUsername;
     void Run() {
-        InitWindow(800, 600, "Davs Bank Simulation");
+        InitWindow(800, 600, "Davs Bank");
 
         while (!WindowShouldClose()) {
             BeginDrawing();
@@ -67,7 +70,7 @@ public:
 private:
     Screen currentScreen = MAIN_MENU;
     User currentUser;
-    bool isEnteringPassword = false;  // New state variable
+    bool isEnteringPassword = false;
 
     void DrawMainMenu() {
         const int screenWidth = GetScreenWidth();
@@ -76,11 +79,9 @@ private:
         DrawText("Welcome to Davs", screenWidth / 2 - MeasureText("Welcome to Davs", 40) / 2, screenHeight / 7, 40, BLACK);
         DrawText("Enter your username and password", screenWidth / 2 - MeasureText("Enter your username and password", 20)/4.5, screenHeight / 5, 10, BLACK);
 
-        DrawText("Username:", screenWidth / 4 + 110, screenHeight / 2 - 100, 20, BLACK);
-        DrawTextBox(usernameBuffer, screenWidth / 2 - 93, 190, 200, usernameBuffer);
-
-        DrawText("Passowrd:", screenWidth / 4 + 110, screenHeight / 2 - 35, 20, BLACK);
-        DrawTextBox(confirmedUsername.c_str(), screenWidth / 2 - 93, 255, 200, passwordBuffer, true);
+        
+        DrawTextBox("Username:", screenWidth / 4 + 107, screenHeight / 2 - 100, 200, usernameBuffer);
+        DrawTextBox("Password:", screenWidth / 2 - 93, 265, 200, passwordBuffer, true);
 
         if (Button("      Continue", screenWidth / 2 - 93, screenHeight / 2 + 75, 200)) {
             // Implement user login logic
@@ -121,6 +122,7 @@ private:
                 currentUser.password = passwordBuffer;
                 currentUser.balance = 0.0f;
                 currentScreen = USER_MENU;
+                SaveUser(currentUser.username, currentUser.password);
             }
         }
 
@@ -157,11 +159,11 @@ private:
             if (Button("Confirm", 50, 300, 200)) {
                 // Implement user login logic
                 // You may want to add data validation and error handling
-                if (currentUser.username == confirmedUsername) {
+                if (AuthenticateUser(currentUser.username, currentUser.password)) {
                     currentScreen = USER_MENU;
                 }
                 else {
-                    // Username doesn't match, handle accordingly
+                    DrawText("User not found!", 400, 300, 20, BLACK);
                 }
 
                 // Reset variables when login attempt is finished
@@ -175,6 +177,7 @@ private:
                 usernameBuffer[0] = '\0';
                 isConfirmingUsername = false;
                 confirmedUsername.clear();
+                
             }
         }
     }
@@ -252,7 +255,31 @@ private:
         }
     }
 };
+void BankSimulation::SaveUser(const std::string& username, const std::string& password) {
+    std::ofstream file("users.txt", std::ios::app);  // Open file in append mode
+    if (file.is_open()) {
+        file << "Username: " << username << " " << "Password: " << password << std::endl;
+        file.close();
+    }
+    else {
+        // Handle file open failure
+    }
+}
 
+bool BankSimulation::AuthenticateUser(const std::string& username, const std::string& password) {
+    std::ifstream file("users.txt");
+    if (file.is_open()) {
+        std::string storedUsername, storedPassword;
+        while (file >> storedUsername >> storedPassword) {
+            if (storedUsername == username && storedPassword == password) {
+                file.close();
+                return true;  // User found and authenticated
+            }
+        }
+        file.close();
+    }
+    return false;  // User not found or authentication failed
+}
 int main() {
     BankSimulation bank;
     bank.Run();
