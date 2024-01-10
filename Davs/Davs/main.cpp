@@ -20,6 +20,11 @@ struct User {
 
 class BankSimulation {
 public:
+    static const int MAX_TEXT_BUFFER_LENGTH = 64;
+    char usernameBuffer[100] = "";
+    char passwordBuffer[100] = "";
+    bool isConfirmingUsername = false;
+    std::string confirmedUsername;
     void Run() {
         InitWindow(800, 600, "Davs Bank Simulation");
 
@@ -41,12 +46,16 @@ public:
                 DrawUserMenu();
                 break;
             case DEPOSIT:
+                // Implement deposit scene
                 break;
             case WITHDRAW:
+                // Implement withdraw scene   
                 break;
             case TRANSFER:
+                // Implement transfer scene
                 break;
             case CHECK_BALANCE:
+                // Implement check balance scene
                 break;
             }
 
@@ -58,22 +67,35 @@ public:
 private:
     Screen currentScreen = MAIN_MENU;
     User currentUser;
-    static const int MAX_TEXT_BUFFER_LENGTH = 64;
-    char usernameBuffer[MAX_TEXT_BUFFER_LENGTH] = "";
-    char passwordBuffer[MAX_TEXT_BUFFER_LENGTH] = "";
+    bool isEnteringPassword = false;  // New state variable
+
     void DrawMainMenu() {
-        DrawText("Davs Bank", GetScreenWidth() / 2 - MeasureText("Davs Bank", 40) / 2, 100, 40, BLACK);
+        const int screenWidth = GetScreenWidth();
+        const int screenHeight = GetScreenHeight();
 
-        if (Button("Register", 50, 200, 200)) {
+        DrawText("Welcome to Davs", screenWidth / 2 - MeasureText("Welcome to Davs", 40) / 2, screenHeight / 7, 40, BLACK);
+        DrawText("Enter your username and password", screenWidth / 2 - MeasureText("Enter your username and password", 20)/4.5, screenHeight / 5, 10, BLACK);
+
+        DrawText("Username:", screenWidth / 4 + 110, screenHeight / 2 - 100, 20, BLACK);
+        DrawTextBox(usernameBuffer, screenWidth / 2 - 93, 190, 200, usernameBuffer);
+
+        DrawText("Passowrd:", screenWidth / 4 + 110, screenHeight / 2 - 35, 20, BLACK);
+        DrawTextBox(confirmedUsername.c_str(), screenWidth / 2 - 93, 255, 200, passwordBuffer, true);
+
+        if (Button("      Continue", screenWidth / 2 - 93, screenHeight / 2 + 75, 200)) {
+            // Implement user login logic
+            // You may want to add data validation and error handling
+            currentUser.username = usernameBuffer;
+            currentScreen = USER_MENU;
+        }
+
+        DrawText("or", screenWidth / 2 - MeasureText("or", 20) / 2, screenHeight / 2 + 120, 20, BLACK);
+        DrawText("Create account", screenWidth / 2 - MeasureText("Create account", 20) / 2, screenHeight / 2 + 145, 20, BLUE);
+
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) &&
+            CheckCollisionPointRec(GetMousePosition(), { (float)(screenWidth / 2 - MeasureText("Create account", 20) / 2), (float)(screenHeight / 2 + 140), (float)MeasureText("Create account", 20), 20 })) {
             currentScreen = REGISTER;
-        }
-
-        if (Button("Log In", 50, 250, 200)) {
-            currentScreen = LOGIN;
-        }
-
-        if (Button("Exit", 50, 300, 200)) {
-            exit(0);
+            usernameBuffer[0] = '\0';
         }
     }
 
@@ -81,32 +103,23 @@ private:
         DrawText("Register", 50, 50, 30, BLACK);
 
         DrawTextBox("Username:", 50, 150, 200, usernameBuffer);
-        DrawTextBox("Password:", 50, 210, 200, passwordBuffer, true);
 
-        if (Button("Register", 50, 300, 200)) {
-            // Implement user registration logic
-            currentUser.username = usernameBuffer;
-            currentUser.password = passwordBuffer;
-            currentUser.balance = 0.0f;
-            currentScreen = USER_MENU;
-        }
-
-        if (Button("Return to Menu", 50, 350, 200)) {
-            currentScreen = MAIN_MENU;
-            // Reset both username and password buffers when returning to the main menu
-            usernameBuffer[0] = '\0';
+        // If Enter is pressed, switch to entering password state
+        if (IsKeyPressed(KEY_ENTER)) {
+            isEnteringPassword = true;
+            // Clear password buffer when switching to the password state
             passwordBuffer[0] = '\0';
         }
-    }
 
-    void DrawLogin() {
-        DrawText("Log In", 50, 50, 30, BLACK);
+        if (isEnteringPassword) {
+            DrawTextBox("Password:", 50, 200, 200, passwordBuffer, true);
 
-        DrawTextBox("Username:", 50, 150, 200, usernameBuffer);
-        DrawTextBox("Password:", 50, 220, 200, passwordBuffer, true);
-
-        if (Button("Log In", 50, 300, 200)) {
-            if (currentUser.username == usernameBuffer && currentUser.password == passwordBuffer) {
+            if (Button("Register", 50, 300, 200)) {
+                // Implement user registration logic
+                // You may want to add data validation and error handling
+                currentUser.username = usernameBuffer;
+                currentUser.password = passwordBuffer;
+                currentUser.balance = 0.0f;
                 currentScreen = USER_MENU;
             }
         }
@@ -116,8 +129,56 @@ private:
             // Reset both username and password buffers when returning to the main menu
             usernameBuffer[0] = '\0';
             passwordBuffer[0] = '\0';
+            // Reset the state to entering username
+            isEnteringPassword = false;
         }
     }
+
+    void DrawLogin() 
+    {
+        static bool isEnteringPassword = false;
+        static bool isConfirmingUsername = false;
+        static std::string confirmedUsername;  // Store the confirmed username
+
+        DrawText("Log In", 50, 50, 30, BLACK);
+
+        if (!isEnteringPassword && !isConfirmingUsername) {
+            DrawTextBox("Username:", 50, 150, 200, usernameBuffer);
+
+            if (IsKeyPressed(KEY_ENTER)) {
+                isConfirmingUsername = true;
+                confirmedUsername = usernameBuffer;  // Store the entered username for confirmation
+            }
+        }
+        else if (isConfirmingUsername) {
+            DrawText("Confirm Username:", 50, 150, 30, BLACK);
+            DrawTextBox(confirmedUsername.c_str(), 50, 200, 200, usernameBuffer);
+
+            if (Button("Confirm", 50, 300, 200)) {
+                // Implement user login logic
+                // You may want to add data validation and error handling
+                if (currentUser.username == confirmedUsername) {
+                    currentScreen = USER_MENU;
+                }
+                else {
+                    // Username doesn't match, handle accordingly
+                }
+
+                // Reset variables when login attempt is finished
+                isConfirmingUsername = false;
+                confirmedUsername.clear();
+            }
+
+            if (Button("Return to Menu", 50, 350, 200)) {
+                currentScreen = MAIN_MENU;
+                // Reset both username and confirmation variables when returning to the main menu
+                usernameBuffer[0] = '\0';
+                isConfirmingUsername = false;
+                confirmedUsername.clear();
+            }
+        }
+    }
+ 
 
     void DrawUserMenu() {
         DrawText("User Menu", 50, 50, 30, BLACK);
@@ -159,9 +220,9 @@ private:
 
         return false;
     }
+
     void DrawTextBox(const char* label, float x, float y, float width, char* buffer, bool isPassword = false) {
         DrawText(label, x, y, 20, BLACK);
-        
         Rectangle textBoxRect = { x, y + 30, width, 30 };
         DrawRectangleRec(textBoxRect, LIGHTGRAY);
         DrawRectangleLinesEx(textBoxRect, 2, BLACK);
@@ -185,15 +246,15 @@ private:
         if (isPassword) {
             DrawText((len > 0) ? "*" : "", x + 10, y + 40, 20, BLACK);
         }
-        else 
-        {
+        else {
+            // Draw the text inside the buffer
             DrawText(buffer, x + 10, y + 40, 20, BLACK);
         }
     }
 };
 
-
 int main() {
     BankSimulation bank;
     bank.Run();
+    return 0;
 }
