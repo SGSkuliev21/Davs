@@ -21,7 +21,7 @@ struct User {
 
 class BankSimulation {
 public:
-    static const int MAX_TEXT_BUFFER_LENGTH = 14;
+    static const int MAX_TEXT_BUFFER_LENGTH = 15;
     char usernameBuffer[50] = "";
     char passwordBuffer[50] = "";
     void SaveUser(const std::string& username, const std::string& password);
@@ -86,11 +86,13 @@ private:
         bool clickedPasswordBox = IsMouseButtonPressed(MOUSE_LEFT_BUTTON) &&
             CheckCollisionPointRec(GetMousePosition(), { (float)(screenWidth / 2 - 93), (float)265, (float)200, 30 });
 
-        // If the password box is clicked, switch to entering password state
-        if (clickedPasswordBox) {
+        // If the password box is clicked, switch the focus to the password box
+        if (clickedPasswordBox = true) {
             isEnteringPassword = true;
             // Clear password buffer when switching to the password state
-            passwordBuffer[0] = '\0';
+        }
+        else {
+            isEnteringPassword = false;  // If not clicked, keep entering the username
         }
 
         // Draw the password text box
@@ -217,25 +219,36 @@ private:
  
 
     void DrawUserMenu() {
-        DrawText("User Menu", 50, 50, 30, BLACK);
+        const int screenWidth = GetScreenWidth();
+        const int screenHeight = GetScreenHeight();
 
-        if (Button("Deposit", 50, 150, 200)) {
+        ClearBackground(RAYWHITE);
+
+        // Draw the user menu title
+        DrawText("User Menu", screenWidth / 2 - MeasureText("User Menu", 30) / 2, 50, 30, BLACK);
+
+        // Draw the user information
+        DrawText("Username:", 100, 150, 20, BLACK);
+        DrawText(currentUser.username.c_str(), 250, 150, 20, BLACK);
+
+        DrawText("Balance:", 100, 200, 20, BLACK);
+        DrawText(TextFormat("$ %.2f", currentUser.balance), 250, 200, 20, BLACK);
+
+        // Draw buttons for different actions
+        if (Button("Deposit", screenWidth / 2 - 100, 300, 200)) 
+        {
             currentScreen = DEPOSIT;
         }
 
-        if (Button("Withdraw", 50, 200, 200)) {
+        if (Button("Withdraw", screenWidth / 2 - 100, 350, 200)) {
             currentScreen = WITHDRAW;
         }
 
-        if (Button("Transfer", 50, 250, 200)) {
+        if (Button("Transfer", screenWidth / 2 - 100, 400, 200)) {
             currentScreen = TRANSFER;
         }
 
-        if (Button("Check Balance", 50, 300, 200)) {
-            currentScreen = CHECK_BALANCE;
-        }
-
-        if (Button("Log Out", 50, 350, 200)) {
+        if (Button("Log Out", screenWidth / 2 - 100, 450, 200)) {
             currentUser = {};  // Clear current user data
             currentScreen = MAIN_MENU;
         }
@@ -289,6 +302,175 @@ private:
             DrawText(buffer, x + 10, y + 40, 20, BLACK);
         }
     }
+    bool LoadUser(const std::string& username, User& user) {
+        std::ifstream file("users.txt");
+        if (file.is_open()) {
+            std::string storedUsername, storedPassword;
+            float storedBalance;
+            while (file >> storedUsername >> storedPassword >> storedBalance) {
+                if (storedUsername == username) {
+                    user.username = storedUsername;
+                    user.password = storedPassword;
+                    user.balance = storedBalance;
+                    file.close();
+                    return true;  // User found
+                }
+            }
+            file.close();
+        }
+        return false;  // User not found
+    }
+
+    void SaveUser(const User& user) {
+        std::ifstream infile("users.txt");
+        std::ofstream outfile("temp.txt", std::ios::app);
+
+        if (infile.is_open() && outfile.is_open()) {
+            std::string storedUsername, storedPassword;
+            float storedBalance;
+
+            while (infile >> storedUsername >> storedPassword >> storedBalance) {
+                if (storedUsername == user.username) {
+                    // Skip the line for the existing user
+                    continue;
+                }
+                // Write other users to the temporary file
+                outfile << storedUsername << " " << storedPassword << " " << storedBalance << std::endl;
+            }
+
+            // Write the updated user to the temporary file
+            outfile << user.username << " " << user.password << " " << user.balance << std::endl;
+
+            // Close the files
+            infile.close();
+            outfile.close();
+
+            // Remove the original file
+            remove("users.txt");
+
+            // Rename the temporary file to the original file
+            rename("temp.txt", "users.txt");
+        }
+    }
+
+    void DrawDeposit() {
+        const int screenWidth = GetScreenWidth();
+        const int screenHeight = GetScreenHeight();
+
+        ClearBackground(RAYWHITE);
+
+        DrawText("Deposit", screenWidth / 2 - MeasureText("Deposit", 30) / 2, 50, 30, BLACK);
+
+        DrawText("Current Balance:", 100, 150, 20, BLACK);
+        DrawText(TextFormat("$ %.2f", currentUser.balance), 250, 150, 20, BLACK);
+
+        DrawText("Enter deposit amount:", 100, 200, 20, BLACK);
+
+        static char depositAmountBuffer[MAX_TEXT_BUFFER_LENGTH] = "";
+        DrawTextBox("", 250, 200, 200, depositAmountBuffer);
+
+        if (Button("Confirm Deposit", screenWidth / 2 - 100, 300, 200)) {
+            // Implement deposit logic
+            float depositAmount = atof(depositAmountBuffer);
+            if (depositAmount > 0) {
+                currentUser.balance += depositAmount;
+                SaveUser(currentUser);  // Save the updated user data
+            }
+            // You may want to add validation and error handling
+            // Reset the deposit amount buffer
+            depositAmountBuffer[0] = '\0';
+        }
+
+        if (Button("Back to User Menu", screenWidth / 2 - 100, 350, 200)) {
+            currentScreen = USER_MENU;
+        }
+    }
+
+    void DrawWithdraw() {
+        const int screenWidth = GetScreenWidth();
+        const int screenHeight = GetScreenHeight();
+
+        ClearBackground(RAYWHITE);
+
+        DrawText("Withdraw", screenWidth / 2 - MeasureText("Withdraw", 30) / 2, 50, 30, BLACK);
+
+        DrawText("Current Balance:", 100, 150, 20, BLACK);
+        DrawText(TextFormat("$ %.2f", currentUser.balance), 250, 150, 20, BLACK);
+
+        DrawText("Enter withdrawal amount:", 100, 200, 20, BLACK);
+
+        static char withdrawAmountBuffer[MAX_TEXT_BUFFER_LENGTH] = "";
+        DrawTextBox("", 250, 200, 200, withdrawAmountBuffer);
+
+        if (Button("Confirm Withdrawal", screenWidth / 2 - 100, 300, 200)) {
+            // Implement withdrawal logic
+            float withdrawAmount = atof(withdrawAmountBuffer);
+            if (withdrawAmount > 0 && withdrawAmount <= currentUser.balance) {
+                currentUser.balance -= withdrawAmount;
+                SaveUser(currentUser);  // Save the updated user data
+            }
+            // You may want to add validation and error handling
+            // Reset the withdrawal amount buffer
+            withdrawAmountBuffer[0] = '\0';
+        }
+
+        if (Button("Back to User Menu", screenWidth / 2 - 100, 350, 200)) {
+            currentScreen = USER_MENU;
+        }
+    }
+
+    void DrawTransfer() {
+        const int screenWidth = GetScreenWidth();
+        const int screenHeight = GetScreenHeight();
+
+        ClearBackground(RAYWHITE);
+
+        DrawText("Transfer", screenWidth / 2 - MeasureText("Transfer", 30) / 2, 50, 30, BLACK);
+
+        DrawText("Current Balance:", 100, 150, 20, BLACK);
+        DrawText(TextFormat("$ %.2f", currentUser.balance), 250, 150, 20, BLACK);
+
+        DrawText("Enter transfer amount:", 100, 200, 20, BLACK);
+
+        static char transferAmountBuffer[MAX_TEXT_BUFFER_LENGTH] = "";
+        DrawTextBox("", 250, 200, 200, transferAmountBuffer);
+
+        DrawText("Enter recipient's username:", 100, 250, 20, BLACK);
+
+        static char recipientUsernameBuffer[MAX_TEXT_BUFFER_LENGTH] = "";
+        DrawTextBox("", 250, 250, 200, recipientUsernameBuffer);
+
+        if (Button("Confirm Transfer", screenWidth / 2 - 100, 350, 200)) {
+            // Implement transfer logic
+            float transferAmount = atof(transferAmountBuffer);
+            std::string recipientUsername(recipientUsernameBuffer);
+
+            // You may want to add validation and error handling
+            // Check if recipient username exists and transferAmount is valid
+            // For simplicity, assuming recipient exists and the amount is valid
+            if (transferAmount > 0 && transferAmount <= currentUser.balance) {
+                // Deduct from the current user
+                currentUser.balance -= transferAmount;
+                SaveUser(currentUser);  // Save the updated user data
+
+                // Add to the recipient (you should fetch recipient's data from the database)
+                User recipientUser;
+                if (LoadUser(recipientUsername, recipientUser)) {
+                    recipientUser.balance += transferAmount;
+                    SaveUser(recipientUser);  // Save the updated recipient data
+                }
+            }
+
+            // Reset the transfer buffers
+            transferAmountBuffer[0] = '\0';
+            recipientUsernameBuffer[0] = '\0';
+        }
+
+        if (Button("Back to User Menu", screenWidth / 2 - 100, 400, 200)) {
+            currentScreen = USER_MENU;
+        }
+    }
+
 };
 void BankSimulation::SaveUser(const std::string& username, const std::string& password) {
     std::ofstream file("users.txt", std::ios::app);  // Open file in append mode
