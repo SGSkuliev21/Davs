@@ -21,9 +21,9 @@ struct User {
 
 class BankSimulation {
 public:
-    static const int MAX_TEXT_BUFFER_LENGTH = 64;
-    char usernameBuffer[100] = "";
-    char passwordBuffer[100] = "";
+    static const int MAX_TEXT_BUFFER_LENGTH = 14;
+    char usernameBuffer[50] = "";
+    char passwordBuffer[50] = "";
     void SaveUser(const std::string& username, const std::string& password);
     bool AuthenticateUser(const std::string& username, const std::string& password);
     bool isConfirmingUsername = false;
@@ -77,26 +77,59 @@ private:
         const int screenHeight = GetScreenHeight();
 
         DrawText("Welcome to Davs", screenWidth / 2 - MeasureText("Welcome to Davs", 40) / 2, screenHeight / 7, 40, BLACK);
-        DrawText("Enter your username and password", screenWidth / 2 - MeasureText("Enter your username and password", 20)/4.5, screenHeight / 5, 10, BLACK);
+        DrawText("Enter your username and password", screenWidth / 2 - MeasureText("Enter your username and password", 20) / 4.5, screenHeight / 5, 10, BLACK);
 
-        
+        // Draw the username text box
         DrawTextBox("Username:", screenWidth / 4 + 107, screenHeight / 2 - 100, 200, usernameBuffer);
-        DrawTextBox("Password:", screenWidth / 2 - 93, 265, 200, passwordBuffer, true);
 
+        // Check if the password box is being clicked
+        bool clickedPasswordBox = IsMouseButtonPressed(MOUSE_LEFT_BUTTON) &&
+            CheckCollisionPointRec(GetMousePosition(), { (float)(screenWidth / 2 - 93), (float)265, (float)200, 30 });
+
+        // If the password box is clicked, switch to entering password state
+        if (clickedPasswordBox) {
+            isEnteringPassword = true;
+            // Clear password buffer when switching to the password state
+            passwordBuffer[0] = '\0';
+        }
+
+        // Draw the password text box
+        DrawTextBox("Password:", screenWidth / 2 - 93, 265, 200, passwordBuffer, isEnteringPassword);
+
+        bool incorrectInput = false;
+
+        // Continue button logic
         if (Button("      Continue", screenWidth / 2 - 93, screenHeight / 2 + 75, 200)) {
-            // Implement user login logic
-            // You may want to add data validation and error handling
-            currentUser.username = usernameBuffer;
-            currentScreen = USER_MENU;
+            if (isEnteringPassword) {
+                // Implement user login logic
+                if (AuthenticateUser(usernameBuffer, passwordBuffer)) {
+                    currentScreen = USER_MENU;
+                }
+                else {
+                    // Set a flag for incorrect input
+                    incorrectInput = true;
+
+                    // Reset variables when login attempt is finished
+                    usernameBuffer[0] = '\0';
+                    passwordBuffer[0] = '\0';
+                }
+            }
+            else {
+                // Switch to entering password state when Continue is pressed
+                isEnteringPassword = true;
+            }
         }
 
         DrawText("or", screenWidth / 2 - MeasureText("or", 20) / 2, screenHeight / 2 + 120, 20, BLACK);
         DrawText("Create account", screenWidth / 2 - MeasureText("Create account", 20) / 2, screenHeight / 2 + 145, 20, BLUE);
 
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) &&
-            CheckCollisionPointRec(GetMousePosition(), { (float)(screenWidth / 2 - MeasureText("Create account", 20) / 2), (float)(screenHeight / 2 + 140), (float)MeasureText("Create account", 20), 20 })) {
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(GetMousePosition(), { (float)(screenWidth / 2 - MeasureText("Create account", 20) / 2), (float)(screenHeight / 2 + 140), (float)MeasureText("Create account", 20), 20 })) {
             currentScreen = REGISTER;
             usernameBuffer[0] = '\0';
+        }
+
+        if (incorrectInput) {
+            DrawText("Incorrect username or password!", screenWidth / 4, screenHeight / 2 + 120, 20, RED);
         }
     }
 
@@ -232,13 +265,15 @@ private:
 
         // Update buffer with input text
         int len = strlen(buffer);
+
+        if (IsKeyPressed(KEY_BACKSPACE) && len > 0) {
+            // Handle backspace
+            buffer[len - 1] = '\0';
+        }
+
         int key = GetKeyPressed();
         if (len < MAX_TEXT_BUFFER_LENGTH - 1) {
-            if (IsKeyPressed(KEY_BACKSPACE) && len > 0) {
-                // Handle backspace
-                buffer[len - 1] = '\0';
-            }
-            else if (key >= 32 && key <= 125) {
+            if (key >= 32 && key <= 125) {
                 // Handle regular characters
                 buffer[len] = static_cast<char>(key);
                 buffer[len + 1] = '\0';
@@ -247,7 +282,7 @@ private:
 
         // Draw asterisks for password input
         if (isPassword) {
-            DrawText((len > 0) ? "*" : "", x + 10, y + 40, 20, BLACK);
+            DrawText(TextFormat("%.*s", len, "****************"), x + 10, y + 40, 20, BLACK);
         }
         else {
             // Draw the text inside the buffer
@@ -276,6 +311,7 @@ bool BankSimulation::AuthenticateUser(const std::string& username, const std::st
                 return true;  // User found and authenticated
             }
         }
+        return false;
         file.close();
     }
     return false;  // User not found or authentication failed
