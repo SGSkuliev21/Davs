@@ -147,8 +147,8 @@ private:
             passwordBuffer[0] = '\0';
         }
 
-        if (isEnteringPassword) {
-            DrawTextBox("Password:", 50, 200, 200, passwordBuffer, true);
+        
+            DrawTextBox("Password:", 50, 220, 200, passwordBuffer, true);
 
             if (Button("Register", 50, 300, 200)) {
                 // Implement user registration logic
@@ -159,7 +159,7 @@ private:
                 currentScreen = USER_MENU;
                 SaveUser(currentUser.username, currentUser.password);
             }
-        }
+        
 
         if (Button("Return to Menu", 50, 350, 200)) {
             currentScreen = MAIN_MENU;
@@ -362,12 +362,12 @@ private:
         DrawText("Deposit", screenWidth / 2 - MeasureText("Deposit", 30) / 2, 50, 30, BLACK);
 
         DrawText("Current Balance:", 100, 150, 20, BLACK);
-        DrawText(TextFormat("$ %.2f", currentUser.balance), 250, 150, 20, BLACK);
+        DrawText(TextFormat("$ %.2f", currentUser.balance), 300, 150, 20, BLACK);
 
         DrawText("Enter deposit amount:", 100, 200, 20, BLACK);
 
         static char depositAmountBuffer[MAX_TEXT_BUFFER_LENGTH] = "";
-        DrawTextBox("", 250, 200, 200, depositAmountBuffer);
+        DrawTextBox("", 300, 200, 200, depositAmountBuffer);
 
         if (Button("Confirm Deposit", screenWidth / 2 - 100, 300, 200)) {
             // Implement deposit logic
@@ -381,7 +381,7 @@ private:
             depositAmountBuffer[0] = '\0';
         }
 
-        if (Button("Back to User Menu", screenWidth / 2 - 100, 350, 200)) {
+        if (Button("Back to Menu", screenWidth / 2 - 100, 350, 200)) {
             currentScreen = USER_MENU;
         }
     }
@@ -395,14 +395,14 @@ private:
         DrawText("Withdraw", screenWidth / 2 - MeasureText("Withdraw", 30) / 2, 50, 30, BLACK);
 
         DrawText("Current Balance:", 100, 150, 20, BLACK);
-        DrawText(TextFormat("$ %.2f", currentUser.balance), 250, 150, 20, BLACK);
+        DrawText(TextFormat("$ %.2f", currentUser.balance), 300, 150, 20, BLACK);
 
         DrawText("Enter withdrawal amount:", 100, 200, 20, BLACK);
 
         static char withdrawAmountBuffer[MAX_TEXT_BUFFER_LENGTH] = "";
         DrawTextBox("", 250, 200, 200, withdrawAmountBuffer);
 
-        if (Button("Confirm Withdrawal", screenWidth / 2 - 100, 300, 200)) {
+        if (Button("Confirm Withdraw", screenWidth / 2 - 100, 300, 200)) {
             // Implement withdrawal logic
             float withdrawAmount = atof(withdrawAmountBuffer);
             if (withdrawAmount > 0 && withdrawAmount <= currentUser.balance) {
@@ -414,7 +414,7 @@ private:
             withdrawAmountBuffer[0] = '\0';
         }
 
-        if (Button("Back to User Menu", screenWidth / 2 - 100, 350, 200)) {
+        if (Button("Back to Menu", screenWidth / 2 - 100, 350, 200)) {
             currentScreen = USER_MENU;
         }
     }
@@ -428,19 +428,19 @@ private:
         DrawText("Transfer", screenWidth / 2 - MeasureText("Transfer", 30) / 2, 50, 30, BLACK);
 
         DrawText("Current Balance:", 100, 150, 20, BLACK);
-        DrawText(TextFormat("$ %.2f", currentUser.balance), 250, 150, 20, BLACK);
+        DrawText(TextFormat("$ %.2f", currentUser.balance), 300, 150, 20, BLACK);
 
         DrawText("Enter transfer amount:", 100, 200, 20, BLACK);
 
         static char transferAmountBuffer[MAX_TEXT_BUFFER_LENGTH] = "";
-        DrawTextBox("", 250, 200, 200, transferAmountBuffer);
+        DrawTextBox("", 250, 195, 200, transferAmountBuffer);
 
-        DrawText("Enter recipient's username:", 100, 250, 20, BLACK);
+        DrawText("Enter recipient's username:", 100, 270, 20, BLACK);
 
         static char recipientUsernameBuffer[MAX_TEXT_BUFFER_LENGTH] = "";
-        DrawTextBox("", 250, 250, 200, recipientUsernameBuffer);
+        DrawTextBox("", 250, 275, 200, recipientUsernameBuffer);
 
-        if (Button("Confirm Transfer", screenWidth / 2 - 100, 350, 200)) {
+        if (Button("Confirm Transfer", screenWidth / 2 - 100, 360, 200)) {
             // Implement transfer logic
             float transferAmount = atof(transferAmountBuffer);
             std::string recipientUsername(recipientUsernameBuffer);
@@ -466,7 +466,7 @@ private:
             recipientUsernameBuffer[0] = '\0';
         }
 
-        if (Button("Back to User Menu", screenWidth / 2 - 100, 400, 200)) {
+        if (Button("Back to Menu", screenWidth / 2 - 100, 420, 200)) {
             currentScreen = USER_MENU;
         }
     }
