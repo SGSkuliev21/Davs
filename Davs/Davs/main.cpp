@@ -49,13 +49,13 @@ public:
                 DrawUserMenu();
                 break;
             case DEPOSIT:
-                // Implement deposit scene
+                DrawDeposit();
                 break;
             case WITHDRAW:
-                // Implement withdraw scene   
+                DrawWithdraw();
                 break;
             case TRANSFER:
-                // Implement transfer scene
+                DrawTransfer();
                 break;
             case CHECK_BALANCE:
                 // Implement check balance scene
@@ -87,7 +87,7 @@ private:
             CheckCollisionPointRec(GetMousePosition(), { (float)(screenWidth / 2 - 93), (float)265, (float)200, 30 });
 
         // If the password box is clicked, switch the focus to the password box
-        if (clickedPasswordBox = true) {
+        if (clickedPasswordBox) {
             isEnteringPassword = true;
             // Clear password buffer when switching to the password state
         }
@@ -286,8 +286,8 @@ private:
 
         int key = GetKeyPressed();
         if (len < MAX_TEXT_BUFFER_LENGTH - 1) {
-            if (key >= 32 && key <= 125) {
-                // Handle regular characters
+            // Handle all printable characters (ASCII range 32 to 126)
+            if (key >= 32 && key <= 126) {
                 buffer[len] = static_cast<char>(key);
                 buffer[len + 1] = '\0';
             }
