@@ -1,6 +1,7 @@
 #include "raylib.h"
 #include <string>
 #include <fstream> 
+#include <iostream>
 
 enum Screen {
     MAIN_MENU,
@@ -10,7 +11,8 @@ enum Screen {
     DEPOSIT,
     WITHDRAW,
     TRANSFER,
-    CHECK_BALANCE
+    CHECK_BALANCE,
+    LEAVE_A_WILL  // Added screen for leaving a will
 };
 
 struct User {
@@ -24,53 +26,22 @@ public:
     static const int MAX_TEXT_BUFFER_LENGTH = 15;
     char usernameBuffer[50] = "";
     char passwordBuffer[50] = "";
+    char willObjectBuffer[MAX_TEXT_BUFFER_LENGTH] = "";  // Buffer for the object to leave in the will
+    char recipientBuffer[MAX_TEXT_BUFFER_LENGTH] = "";   // Buffer for the recipient's name in the will
+
     void SaveUser(const std::string& username, const std::string& password);
     bool AuthenticateUser(const std::string& username, const std::string& password);
     bool isConfirmingUsername = false;
     std::string confirmedUsername;
-    void Run() {
-        InitWindow(800, 600, "Davs Bank");
-
-        while (!WindowShouldClose()) {
-            BeginDrawing();
-            ClearBackground(RAYWHITE);
-
-            switch (currentScreen) {
-            case MAIN_MENU:
-                DrawMainMenu();
-                break;
-            case REGISTER:
-                DrawRegister();
-                break;
-            case LOGIN:
-                DrawLogin();
-                break;
-            case USER_MENU:
-                DrawUserMenu();
-                break;
-            case DEPOSIT:
-                DrawDeposit();
-                break;
-            case WITHDRAW:
-                DrawWithdraw();
-                break;
-            case TRANSFER:
-                DrawTransfer();
-                break;
-            case CHECK_BALANCE:
-                // Implement check balance scene
-                break;
-            }
-
-            EndDrawing();
-        }
-
-    }
+    void Run();
 
 private:
     Screen currentScreen = MAIN_MENU;
     User currentUser;
     bool isEnteringPassword = false;
+
+
+
 
     void DrawMainMenu() {
         const int screenWidth = GetScreenWidth();
@@ -248,9 +219,12 @@ private:
             currentScreen = TRANSFER;
         }
 
-        if (Button("Log Out", screenWidth / 2 - 100, 450, 200)) {
+        if (Button("Log Out", screenWidth / 2 - 100, 500, 200)) {
             currentUser = {};  // Clear current user data
             currentScreen = MAIN_MENU;
+        }
+        if (Button("Leave a Will", screenWidth / 2 - 100, 450, 200)) {
+            currentScreen = LEAVE_A_WILL;
         }
     }
 
@@ -352,6 +326,7 @@ private:
             rename("temp.txt", "users.txt");
         }
     }
+
 
     void DrawDeposit() {
         const int screenWidth = GetScreenWidth();
@@ -470,8 +445,78 @@ private:
             currentScreen = USER_MENU;
         }
     }
+    void DrawLeaveAWill() {
+        const int screenWidth = GetScreenWidth();
+        const int screenHeight = GetScreenHeight();
 
+        ClearBackground(RAYWHITE);
+
+        DrawText("Leave a Will", screenWidth / 2 - MeasureText("Leave a Will", 30) / 2, 50, 30, BLACK);
+
+        DrawText("Object to leave:", 100, 150, 20, BLACK);
+        DrawTextBox("", 300, 150, 200, willObjectBuffer);
+
+        DrawText("Recipient's name:", 100, 200, 20, BLACK);
+        DrawTextBox("", 300, 200, 200, recipientBuffer);
+
+        if (Button("Confirm Will", screenWidth / 2 - 100, 300, 200)) {
+            // Implement leave a will logic
+            // You may want to add validation and error handling
+            // For simplicity, let's just print the will details for now
+            std::cout << "Object to leave: " << willObjectBuffer << std::endl;
+            std::cout << "Recipient's name: " << recipientBuffer << std::endl;
+
+            // Reset the will buffers
+            willObjectBuffer[0] = '\0';
+            recipientBuffer[0] = '\0';
+        }
+
+        if (Button("Back to Menu", screenWidth / 2 - 100, 350, 200)) {
+            currentScreen = USER_MENU;
+        }
+    }
 };
+void BankSimulation::Run() {
+    InitWindow(800, 600, "Davs Bank");
+
+    while (!WindowShouldClose()) {
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
+
+        switch (currentScreen) {
+        case MAIN_MENU:
+            DrawMainMenu();
+            break;
+        case REGISTER:
+            DrawRegister();
+            break;
+        case LOGIN:
+            DrawLogin();
+            break;
+        case USER_MENU:
+            DrawUserMenu();
+            break;
+        case DEPOSIT:
+            DrawDeposit();
+            break;
+        case WITHDRAW:
+            DrawWithdraw();
+            break;
+        case TRANSFER:
+            DrawTransfer();
+            break;
+        case CHECK_BALANCE:
+            // Implement check balance scene
+            break;
+        case LEAVE_A_WILL:
+            DrawLeaveAWill();
+            break;
+        }
+
+        EndDrawing();
+    }
+}
+
 void BankSimulation::SaveUser(const std::string& username, const std::string& password) {
     std::ofstream file("users.txt", std::ios::app);  // Open file in append mode
     if (file.is_open()) {
@@ -498,6 +543,8 @@ bool BankSimulation::AuthenticateUser(const std::string& username, const std::st
     }
     return false;  // User not found or authentication failed
 }
+
+
 int main() {
     BankSimulation bank;
     bank.Run();
