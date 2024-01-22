@@ -2,6 +2,7 @@
 #include <string>
 #include <fstream> 
 #include <iostream>
+#include <cctype>
 
 enum Screen {
     MAIN_MENU,
@@ -21,6 +22,13 @@ struct User {
     float balance;
 };
 
+struct NAME_BOX {
+    char input[15] + 1];
+    int charCount;
+    Rectangle box;
+    int framesCounter;
+};
+
 class BankSimulation {
 public:
     static const int MAX_TEXT_BUFFER_LENGTH = 15;
@@ -29,10 +37,26 @@ public:
     char willObjectBuffer[MAX_TEXT_BUFFER_LENGTH] = "";  // Buffer for the object to leave in the will
     char recipientBuffer[MAX_TEXT_BUFFER_LENGTH] = "";   // Buffer for the recipient's name in the will
 
+    bool checkRequirements(const char* str);
     void SaveUser(const std::string& username, const std::string& password);
     bool AuthenticateUser(const std::string& username, const std::string& password);
     bool isConfirmingUsername = false;
     std::string confirmedUsername;
+    const int screenWidth = 800;
+    const int screenHeight = 450;;
+
+    const int boxWidth = 300;
+    const int boxHeight = 40;
+    const int margin = 10;
+
+    char username[256] = { 0 };
+    char password[256] = { 0 };
+
+    Rectangle usernameBox = { static_cast<float>(screenWidth) / 2 - boxWidth / 2, static_cast<float>(screenHeight) / 2 - boxHeight - margin, static_cast<float>(boxWidth), static_cast<float>(boxHeight) };
+    Rectangle passwordBox = { static_cast<float>(screenWidth) / 2 - boxWidth / 2, static_cast<float>(screenHeight) / 2 + margin, static_cast<float>(boxWidth), static_cast<float>(boxHeight) };
+
+    bool isUsernameSelected = false;
+    bool isPasswordSelected = false;
     void Run();
 
 private:
@@ -106,21 +130,73 @@ private:
         }
     }
 
-    void DrawRegister() {
-        DrawText("Register", 50, 50, 30, BLACK);
+    bool checkRequirements(const char* str) {
+        bool hasCapital = false;
+        bool hasLower = false;
+        bool hasDigit = false;
+        bool hasSpecial = false;
 
-        DrawTextBox("Username:", 50, 150, 200, usernameBuffer);
+        const char* specialCharacters = "!@#$%^&*()-_+=[]{}|;:'\",.<>?";
 
-        // If Enter is pressed, switch to entering password state
-        if (IsKeyPressed(KEY_ENTER)) {
-            isEnteringPassword = true;
-            // Clear password buffer when switching to the password state
-            passwordBuffer[0] = '\0';
+        for (const char* c = str; *c != '\0'; ++c) {
+            if (isupper(*c)) {
+                hasCapital = true;
+            }
+            else if (islower(*c)) {
+                hasLower = true;
+            }
+            else if (isdigit(*c)) {
+                hasDigit = true;
+            }
+            else if (strchr(specialCharacters, *c) != nullptr) {
+                hasSpecial = true;
+            }
         }
 
-        
-            DrawTextBox("Password:", 50, 220, 200, passwordBuffer, true);
+        return hasCapital && hasLower && hasDigit && hasSpecial && (strlen(str) >= 6);
+    }
 
+    void DrawRegister() {
+        DrawRectangleRec(usernameBox, isUsernameSelected ? GRAY : LIGHTGRAY);
+        DrawRectangleLinesEx(usernameBox, 2, BLACK);
+
+        DrawRectangleRec(passwordBox, isPasswordSelected ? GRAY : LIGHTGRAY);
+        DrawRectangleLinesEx(passwordBox, 2, BLACK);
+
+        DrawText("Username:", static_cast<int>(usernameBox.x) + 10, static_cast<int>(usernameBox.y) + 10, 20, BLACK);
+        DrawText("Password:", static_cast<int>(passwordBox.x) + 10, static_cast<int>(passwordBox.y) + 10, 20, BLACK);
+
+
+
+        drawTextBox(firstNameBox, "First Name:");
+        DrawText(checkRequirements("The password must contain 6 letters, small letter,  capital letter, special character: ") ? "^_^" : "X", (int)300, (int)300, 30, checkRequirements("The password must contain 6 letters, small letter,  capital letter, special character: ") ? GREEN : RED);
+
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            Vector2 mousePoint = GetMousePosition();
+
+            isUsernameSelected = CheckCollisionPointRec(mousePoint, usernameBox);
+            isPasswordSelected = CheckCollisionPointRec(mousePoint, passwordBox);
+        }
+
+        if (isUsernameSelected) {
+            int key = GetKeyPressed();
+            if (key > 0 && strlen(username) < sizeof(username) - 1) {
+                username[strlen(username)] = static_cast<char>(key);
+            }
+            if (IsKeyPressed(KEY_BACKSPACE) && strlen(username) > 0) {
+                username[strlen(username) - 1] = '\0';
+            }
+        }
+
+        if (isPasswordSelected) {
+            int key = GetKeyPressed();
+            if (key > 0 && strlen(password) < sizeof(password) - 1) {
+                password[strlen(password)] = static_cast<char>(key);
+            }
+            if (IsKeyPressed(KEY_BACKSPACE) && strlen(password) > 0) {
+                password[strlen(password) - 1] = '\0';
+            }
+        }
             if (Button("Register", 50, 300, 200)) {
                 // Implement user registration logic
                 // You may want to add data validation and error handling
@@ -141,6 +217,7 @@ private:
             isEnteringPassword = false;
         }
     }
+
 
     void DrawLogin() 
     {
@@ -244,38 +321,25 @@ private:
         return false;
     }
 
-    void DrawTextBox(const char* label, float x, float y, float width, char* buffer, bool isPassword = false) {
-        DrawText(label, x, y, 20, BLACK);
-        Rectangle textBoxRect = { x, y + 30, width, 30 };
-        DrawRectangleRec(textBoxRect, LIGHTGRAY);
-        DrawRectangleLinesEx(textBoxRect, 2, BLACK);
+    void drawTextBox(NAME_BOX& textBox, const char* label) {
+        DrawText(label, (int)textBox.box.x, (int)textBox.box.y - 30, 20, BLACK);
+        DrawRectangleRec(textBox.box, RAYWHITE);
+        DrawText(textBox.input, (int)textBox.box.x + 5, (int)textBox.box.y + 4, 20, BLACK);
 
-        // Update buffer with input text
-        int len = strlen(buffer);
+        if (isMouseOverBox(textBox.box)) {
+            if (textBox.charCount <15>) {
+                if (((textBox.framesCounter / 20) % 2) == 0) {
+                    if (IsKeyPressed(KEY_BACKSPACE) && len > 0) {
+                        // Handle backspace
+                        buffer[len - 1] = '\0';
+                    }
 
-        if (IsKeyPressed(KEY_BACKSPACE) && len > 0) {
-            // Handle backspace
-            buffer[len - 1] = '\0';
-        }
-
-        int key = GetKeyPressed();
-        if (len < MAX_TEXT_BUFFER_LENGTH - 1) {
-            // Handle all printable characters (ASCII range 32 to 126)
-            if (key >= 32 && key <= 126) {
-                buffer[len] = static_cast<char>(key);
-                buffer[len + 1] = '\0';
+                    DrawText("|", (int)textBox.box.x + 8 + MeasureText(textBox.input, 20), (int)textBox.box.y + 6, 20, BLACK);
+                }
             }
         }
-
-        // Draw asterisks for password input
-        if (isPassword) {
-            DrawText(TextFormat("%.*s", len, "****************"), x + 10, y + 40, 20, BLACK);
-        }
-        else {
-            // Draw the text inside the buffer
-            DrawText(buffer, x + 10, y + 40, 20, BLACK);
-        }
     }
+
     bool LoadUser(const std::string& username, User& user) {
         std::ifstream file("users.txt");
         if (file.is_open()) {
