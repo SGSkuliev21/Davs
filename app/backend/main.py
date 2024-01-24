@@ -1,35 +1,36 @@
-from fastapi import FastAPI, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-from pydantic import BaseModel
+# main.py
+from banking_operations import create_account, deposit, withdraw, check_balance, transfer, load_accounts, save_accounts
 
-app = FastAPI()
+def main():
+    accounts = load_accounts()
 
-users_db = {'user1': {'password': 'password1'}, 'user2': {'password': 'password2'}}
+    while True:
+        print("Welcome to the Banking System")
+        print("1. Create Account")
+        print("2. Deposit")
+        print("3. Withdraw")
+        print("4. Transfer")
+        print("5. Check Balance")
+        print("6. Exit")
 
-class User(BaseModel):
-    username: str
+        choice = input("Enter your choice (1-6): ")
 
-class UserInDB(User):
-    password: str
+        if choice == '1':
+            create_account(accounts)
+        elif choice == '2':
+            deposit(accounts)
+        elif choice == '3':
+            withdraw(accounts)
+        elif choice == '4':
+            transfer(accounts)
+        elif choice == '5':
+            check_balance(accounts)
+        elif choice == '6':
+            print("Exiting the program. Thank you!")
+            save_accounts(accounts)
+            break
+        else:
+            print("Invalid choice. Please enter a number between 1 and 6.")
 
-class UserInLogin(User):
-    password: str
-
-def get_user(db, username: str):
-    if username in db:
-        user_dict = db[username]
-        return UserInDB(**user_dict)
-    return None
-
-@app.post("/token")
-async def login_for_access_token(form_data: UserInLogin):
-    user_db = get_user(users_db, form_data.username)
-    
-    if user_db and user_db.password == form_data.password:
-        return {"access_token": form_data.username, "token_type": "bearer"}
-
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Incorrect username or password",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+if __name__ == "__main__":
+    main()
