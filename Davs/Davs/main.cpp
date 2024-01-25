@@ -19,6 +19,13 @@ struct MAIN_MENU
     Rectangle createAccountButton;
 };
 
+
+struct User {
+    std::string username;
+    float balance;
+};
+
+
 struct REGISTRATION_FORM
 {
     CREDENTIAL_BOX firstNameBox{ "", 0, {700, 140, 200, 30}, 0 };
@@ -45,7 +52,7 @@ enum ActiveBox {
 };
 
 ActiveBox activeBox = USERNAME;
-bool registrationFormActive = false;  // Add this line
+bool registrationFormActive = false;
 
 MAIN_MENU mainMenu = {
     { "", 0, {GetScreenWidth() / 2 + 310, GetScreenHeight() / 2 + 240, 200, 30}, 0 },
@@ -54,7 +61,7 @@ MAIN_MENU mainMenu = {
     { GetScreenWidth() / 2 + 310, GetScreenHeight() / 2 + 450, 200, 40 }
 };
 
-REGISTRATION_FORM registrationForm = 
+REGISTRATION_FORM registrationForm =
 {
     { "", 0, {GetScreenWidth() / 2 + 300, 140, 200, 30}, 0 },
     { "", 0, {GetScreenWidth() / 2 + 300, 200, 200, 30}, 0 },
@@ -97,6 +104,63 @@ void drawTextBox(CREDENTIAL_BOX& textBox, const char* label, bool showCharacters
     }
 }
 
+
+
+bool isValidNumber(const std::string& input) {
+    try {
+        std::stof(input);
+        return true;
+    }
+    catch (...) {
+        return false;
+    }
+}
+
+
+void Deposit(User& currentUser)
+{
+    std::string input;
+    float depositAmount;
+
+    std::cout << "Enter the amount you want to deposit: ";
+    std::getline(std::cin, input);
+
+    while (!isValidNumber(input)) {
+        std::cout << "Invalid input. Please enter a valid number: ";
+        std::getline(std::cin, input);
+    }
+
+    depositAmount = std::stof(input);
+
+    currentUser.balance += depositAmount;
+
+    std::cout << "Deposit successful. Updated balance: " << currentUser.balance << std::endl;
+}
+
+void Withdraw(User& currentUser)
+{
+    std::string input;
+    float withdrawAmount = 0;
+
+    std::cout << "Enter the amount you want to withdraw: ";
+    std::getline(std::cin, input);
+
+    while (!isValidNumber(input)) {
+        std::cout << "Invalid input. Please enter a valid number: ";
+        std::getline(std::cin, input);
+    }
+
+    if (withdrawAmount > currentUser.balance) {
+        std::cout << "Insufficient funds. Withdrawal unsuccessful." << std::endl;
+    }
+    else
+    {
+        currentUser.balance -= withdrawAmount;
+
+        std::cout << "Withdrawal successful. Updated balance: " << currentUser.balance << std::endl;
+    }
+}
+
 bool checkRequirements(const char* str) {
     bool hasCapital = false;
     bool hasLower = false;
@@ -132,11 +196,11 @@ void saveUserData(const char* firstName, const char* lastName, const char* usern
         file << "Last Name: " << lastName << std::endl;
         file << "Username: " << username << std::endl;
         file << "Password: " << password << std::endl;
-        file << "--------------------------" << std::endl;  
+        file << "Balance: 0.0" << std::endl;
+        file << "--------------------------" << std::endl;  // Separator for each user
         file.close();
     }
-    else 
-    {
+    else {
         std::cout << "Unable to open file for writing." << std::endl;
     }
 }
@@ -169,6 +233,121 @@ struct Button {
     Rectangle rect;
     std::string label;
 };
+
+User currentUser;
+
+
+
+
+
+void DrawUserMenu()
+{
+    Button depositButton;
+    depositButton.label = "Deposit";
+    depositButton.rect = { 600, 50, 150, 40 };
+
+    Button withdrawButton;
+    withdrawButton.label = "Withdraw";
+    withdrawButton.rect = { 600, 100, 150, 40 };
+
+    Button transferButton;
+    transferButton.label = "Transfer";
+    transferButton.rect = { 600, 150, 150, 40 };
+
+    Button leaveWillButton;
+    leaveWillButton.label = "Leave a Will";
+    leaveWillButton.rect = { 600, 200, 150, 40 };
+
+    Button investButton;
+    investButton.label = "Invest";
+    investButton.rect = { 600, 250, 150, 40 };
+
+    TextBox depositTextBox;
+    depositTextBox.rect = { 50, 50, 150, 40 };
+
+    TextBox withdrawTextBox;
+    withdrawTextBox.rect = { 50, 100, 150, 40 };
+
+    TextBox transferTextBox;
+    transferTextBox.rect = { 50, 150, 150, 40 };
+
+    while (!WindowShouldClose())
+    {
+        BeginDrawing();
+        ClearBackground(LIGHTGRAY);
+
+        DrawText(("Balance: " + std::to_string(currentUser.balance)).c_str(), 10, 20, 20, BLACK);
+
+        if (CheckCollisionPointRec(GetMousePosition(), depositButton.rect))
+        {
+            DrawRectangleRec(depositButton.rect, { 0, 160, 0, 255 });
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            {
+                Deposit(currentUser);
+            }
+        }
+        else
+        {
+            DrawRectangleRec(depositButton.rect, GREEN);
+        }
+        DrawText(depositButton.label.c_str(), depositButton.rect.x + 10, depositButton.rect.y + 10, 20, WHITE);
+
+        if (CheckCollisionPointRec(GetMousePosition(), withdrawButton.rect))
+        {
+            DrawRectangleRec(withdrawButton.rect, { 0, 160, 0, 255 });
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            {
+                Withdraw(currentUser);
+            }
+        }
+        else
+        {
+            DrawRectangleRec(withdrawButton.rect, GREEN);
+        }
+        DrawText(withdrawButton.label.c_str(), withdrawButton.rect.x + 10, withdrawButton.rect.y + 10, 20, WHITE);
+
+        if (CheckCollisionPointRec(GetMousePosition(), transferButton.rect))
+        {
+            DrawRectangleRec(transferButton.rect, { 0, 160, 0, 255 });
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            {
+            }
+        }
+        else
+        {
+            DrawRectangleRec(transferButton.rect, GREEN);
+        }
+        DrawText(transferButton.label.c_str(), transferButton.rect.x + 10, transferButton.rect.y + 10, 20, WHITE);
+
+        if (CheckCollisionPointRec(GetMousePosition(), leaveWillButton.rect))
+        {
+            DrawRectangleRec(leaveWillButton.rect, { 0, 160, 0, 255 });
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            {
+            }
+        }
+        else
+        {
+            DrawRectangleRec(leaveWillButton.rect, GREEN);
+        }
+        DrawText(leaveWillButton.label.c_str(), leaveWillButton.rect.x + 10, leaveWillButton.rect.y + 10, 20, WHITE);
+
+        if (CheckCollisionPointRec(GetMousePosition(), investButton.rect))
+        {
+            DrawRectangleRec(investButton.rect, { 0, 160, 0, 255 });
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            {
+            }
+        }
+        else
+        {
+            DrawRectangleRec(investButton.rect, GREEN);
+        }
+        DrawText(investButton.label.c_str(), investButton.rect.x + 10, investButton.rect.y + 10, 20, WHITE);
+
+        EndDrawing();
+    }
+}
 
 void RegisterForm()
 {
@@ -318,7 +497,6 @@ void RegisterForm()
         }
         DrawText("Register", registrationForm.registerButton.x + 60, registrationForm.registerButton.y + 10, 20, WHITE);
 
-        // Check if the Register button is clicked
         if (isMouseOverBox(registrationForm.registerButton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
         {
             if (strcmp(registrationForm.passwordBox.input, registrationForm.confirmPasswordBox.input) == 0 && checkRequirements(registrationForm.passwordBox.input)) {
@@ -327,7 +505,6 @@ void RegisterForm()
 
                     saveUserData(registrationForm.firstNameBox.input, registrationForm.lastNameBox.input, registrationForm.usernameBox.input, registrationForm.passwordBox.input);
 
-                    // Reset registration form data
                     registrationForm.firstNameBox.charCount = 0;
                     registrationForm.lastNameBox.charCount = 0;
                     registrationForm.usernameBox.charCount = 0;
@@ -340,7 +517,6 @@ void RegisterForm()
                     memset(registrationForm.passwordBox.input, 0, sizeof(registrationForm.passwordBox.input));
                     memset(registrationForm.confirmPasswordBox.input, 0, sizeof(registrationForm.confirmPasswordBox.input));
 
-                    // Exit registration form loop
                     registrationFormActive = false;
                     break;
                 }
@@ -359,6 +535,7 @@ void RegisterForm()
                 const char* password = "";
 
                 saveUserData(firstName, lastName, username, password);
+                DrawUserMenu();
             }
         }
 
@@ -424,18 +601,6 @@ void DrawMainMenu()
 
         if (IsKeyPressed(KEY_BACKSPACE)) {
             switch (activeBox) {
-            case FIRST_NAME:
-                if (registrationForm.firstNameBox.charCount > 0) {
-                    registrationForm.firstNameBox.input[registrationForm.firstNameBox.charCount - 1] = '\0';
-                    registrationForm.firstNameBox.charCount--;
-                }
-                break;
-            case LAST_NAME:
-                if (registrationForm.lastNameBox.charCount > 0) {
-                    registrationForm.lastNameBox.input[registrationForm.lastNameBox.charCount - 1] = '\0';
-                    registrationForm.lastNameBox.charCount--;
-                }
-                break;
             case USERNAME:
                 if (registrationForm.usernameBox.charCount > 0) {
                     registrationForm.usernameBox.input[registrationForm.usernameBox.charCount - 1] = '\0';
@@ -446,12 +611,6 @@ void DrawMainMenu()
                 if (registrationForm.passwordBox.charCount > 0) {
                     registrationForm.passwordBox.input[registrationForm.passwordBox.charCount - 1] = '\0';
                     registrationForm.passwordBox.charCount--;
-                }
-                break;
-            case CONFIRM_PASSWORD:
-                if (registrationForm.confirmPasswordBox.charCount > 0) {
-                    registrationForm.confirmPasswordBox.input[registrationForm.confirmPasswordBox.charCount - 1] = '\0';
-                    registrationForm.confirmPasswordBox.charCount--;
                 }
                 break;
             }
@@ -482,23 +641,21 @@ void DrawMainMenu()
 
         if (CheckCollisionPointRec(GetMousePosition(), mainMenu.continueButton))
         {
-            
+
             DrawRectangleRec(mainMenu.continueButton, BLUE);
             DrawText("Continue", mainMenu.continueButton.x + 60, mainMenu.continueButton.y + 10, 20, WHITE);
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
             {
-                const char* username = ""; // Replace with actual value
-                const char* password = ""; // Replace with actual value
+                const char* username = "";
+                const char* password = "";
 
                 // Check if the account exists
                 if (checkExistingAccount(username, password))
                 {
-                    std::cout << "Mazna";
+                    DrawUserMenu();
                 }
                 else
                 {
-                    // Account doesn't exist, show a message or take appropriate action
-                    // For now, let's just print a message
                     std::cout << "Invalid username or password. Please try again." << std::endl;
                 }
             }
@@ -531,7 +688,7 @@ int main()
     while (!WindowShouldClose())
     {
         BeginDrawing();
-        
+
         ClearBackground(LIGHTGRAY);
         DrawMainMenu();
     }
