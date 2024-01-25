@@ -141,6 +141,25 @@ void saveUserData(const char* firstName, const char* lastName, const char* usern
     }
 }
 
+bool checkExistingAccount(const char* username, const char* password)
+{
+    std::ifstream file("users.txt");
+    std::string line;
+
+    while (std::getline(file, line)) {
+        if (line.find("Username: " + std::string(username)) != std::string::npos) {
+            std::getline(file, line); // Skip the "Password: " line
+            std::getline(file, line); // Get the actual password line
+
+            // Check if the provided password matches
+            return line.find("Password: " + std::string(password)) != std::string::npos;
+        }
+    }
+
+    return false;
+}
+
+
 struct TextBox {
     std::string text;
     Rectangle rect;
@@ -460,6 +479,30 @@ void DrawMainMenu()
             DrawRectangleRec(mainMenu.continueButton, DARKBLUE);
         }
         DrawText("Continue", mainMenu.continueButton.x + 60, mainMenu.continueButton.y + 10, 20, WHITE);
+
+        if (CheckCollisionPointRec(GetMousePosition(), mainMenu.continueButton))
+        {
+            
+            DrawRectangleRec(mainMenu.continueButton, BLUE);
+            DrawText("Continue", mainMenu.continueButton.x + 60, mainMenu.continueButton.y + 10, 20, WHITE);
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            {
+                const char* username = ""; // Replace with actual value
+                const char* password = ""; // Replace with actual value
+
+                // Check if the account exists
+                if (checkExistingAccount(username, password))
+                {
+                    std::cout << "Mazna";
+                }
+                else
+                {
+                    // Account doesn't exist, show a message or take appropriate action
+                    // For now, let's just print a message
+                    std::cout << "Invalid username or password. Please try again." << std::endl;
+                }
+            }
+        }
 
 
         if (CheckCollisionPointRec(GetMousePosition(), mainMenu.createAccountButton))
