@@ -15,7 +15,9 @@
 
 ## 💻 About
 <br>
-<b><p align="center">ABOUT US
+<b><p align="center">Digital Advanced Vitalization Systems (DAVS) revolutionize the concept of wills in the digital era, offering a seamless and secure platform for individuals to manage their digital assets and distribute them according to their wishes. DAVS provides a comprehensive solution for organizing and bequeathing online accounts, cryptocurrencies, social media profiles, and other digital possessions.
+
+
 </p></b>
 <br>
 
