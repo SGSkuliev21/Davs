@@ -1,7 +1,7 @@
 <h1 align="center">Team DAVS</h1>
 
 <p align="center">
-        
+        <img src ="assets/banner.png"/>
 </p>
 
 ## 🧒 Our Team
