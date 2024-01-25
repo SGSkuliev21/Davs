@@ -6,10 +6,6 @@ import Profile from '../components/Profile';
 
 function MainPage() {
 
-  const navigation = useNavigate();
-  
-
-
   const containerStyle = {
     textAlign: 'center',
     fontFamily: 'Arial, sans-serif',

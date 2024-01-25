@@ -1,6 +1,6 @@
 import {Link} from "react-router-dom"
 import React, { useState, useEffect } from 'react';
-
+import Logo from "../assets/logo.png"
 
 
 function NavBar({ handleClick ,handleClick1, handleClick2 }){
@@ -24,10 +24,9 @@ function NavBar({ handleClick ,handleClick1, handleClick2 }){
     <div className="navbar-div" style={{ top: visible ? '0' : '-95px' }}>
       <nav className="navbar">
         <div className="logo">
-
+          <img src = {Logo}></img>
 
         </div>
-          <h1 id="logo">DAVS</h1>
         <ul className="nav-links">
           <li onClick = {handleClick}><Link to="/">FEATURES</Link></li>
           <li onClick = {handleClick1}><Link to="/">ABOUT</Link></li>

@@ -32,7 +32,7 @@
 .logo {
   float:left;
 }
-#logo  {
+.logo  {
   float:left;
   padding-right: 750px;
 }
@@ -40,6 +40,22 @@
 .logo img {
   padding-left: 6rem;
   height: 60px;
+}
+.profile button {
+  background-color: #99ADDB;
+  border: none;
+  border-radius: 5rem;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 20px;
+  font-weight: 600;
+  margin: 4px 2px;
+  cursor: pointer;
+  transition: all 1s;
+  margin-top: 50px;
 }
 .nav-links {
   list-style: none;
