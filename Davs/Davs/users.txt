@@ -83,3 +83,15 @@ Username:
 Password: 
 Balance: 0.0
 --------------------------
+First Name: 
+Last Name: 
+Username: 
+Password: 
+Balance: 0.0
+--------------------------
+First Name: 
+Last Name: 
+Username: 
+Password: 
+Balance: 0.0
+--------------------------
