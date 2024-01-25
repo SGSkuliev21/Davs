@@ -77,3 +77,9 @@ Last Name: Byandov
 Username: dkbyandov21
 Password: mitko123!M
 --------------------------
+First Name: 
+Last Name: 
+Username: 
+Password: 
+Balance: 0.0
+--------------------------
