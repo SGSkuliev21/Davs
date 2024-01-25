@@ -10,11 +10,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.39.3",
     "axios": "^1.6.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-lazy-load-image-component": "^1.6.0",
     "react-modal": "^3.16.1",
+    "react-query": "^3.39.3",
     "react-router-dom": "^6.21.3",
     "react-toastify": "^10.0.4"
   },

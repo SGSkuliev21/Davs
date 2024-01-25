@@ -12,7 +12,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
+    <script>
+      const supabaseUrl = 'https://bhxpjlxumnectpgwwlqv.supabase.co';
+      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoeHBqbHh1bW5lY3RwZ3d3bHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDYxMTY2MTgsImV4cCI6MjAyMTY5MjYxOH0.r_gxlvjxKq6Ql9UOC_s2jSqnkXl47HpjvwtbrJBMbfs';
+      const supabase = createClient(supabaseUrl, supabaseKey);
+    </script>
   </head>
   <body>
     <div id="root"></div>

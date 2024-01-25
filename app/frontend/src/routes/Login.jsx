@@ -3,110 +3,110 @@ import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Footer from "../components/Footer";
+import {supabase} from "../lib/helper/supabaseClient";
 
-const Login = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const navigation = useNavigate();
+const Login = ({setToken}) => {
 
-  useEffect(() => {
-    const storedUsername = sessionStorage.getItem('username');
 
-    if (storedUsername) {
-      sessionStorage.removeItem('username');
-      toast.success("Successfully Signout")
+  let navigate = useNavigate()
+
+  const [formData,setFormData] = useState({
+        email:'',password:''
+  })
+
+  console.log(formData)
+
+  function handleChange(event){
+    setFormData((prevFormData)=>{
+      return{
+        ...prevFormData,
+        [event.target.name]:event.target.value
+      }
+
+    })
+
+  }
+
+  async function handleSubmit(e){
+    e.preventDefault()
+
+    try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: formData.email,
+            password: formData.password,
+          })
+
+      if (error) throw error
+      console.log(data)
+      setToken(data)
+      navigate('/homepage')
+
+
+    //   alert('Check your email for verification link')
+
+      
+    } catch (error) {
+      alert(error)
     }
-  }, []);
+  }
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-
-    if (validate()) {
-      fetch("http://localhost:3001/users?username=" + username)
-        .then((res) => res.json())
-        .then((resp) => {
-          console.log(resp);
-          console.log(resp[0]["password"]);
-          if (Object.keys(resp).length === 0) {
-            toast.error("Please Enter valid username");
-          } else {
-            if (resp[0]["password"] === password) {
-              toast.success("Successful");
-              sessionStorage.setItem('username', username);
-              navigation('/main');
-            } else {
-              toast.error(`Please Enter valid credentials`);
-            }
-          }
-        })
-        .catch((err) => {
-          toast.error("Login Failed due to:" + err.message);
-        });
-    }
-  };
-
-  const validate = () => {
-    let result = true;
-    if (username === '' || username === null) {
-      result = false;
-      toast.warning("Please Enter Username");
-    }
-    if (password === '' || password === null) {
-      result = false;
-      toast.warning("Please Enter Password");
-    }
-    return result;
-  };
-
+  const loginform = async()=> {
+    await supabase.auth.signInWithOAuth({
+      provider:"github",
+      options: {
+        redirectTo: 'http://localhost:5173/main'
+      }
+    });
+  }
   return (
     <>
-
       <div className="login-form">
         <div className="login-banner">
           <div className="login-banner1">
             <Link to="/"><i className="arrow"></i></Link>
               <label>
-                <h2>Students helping students, one login closer to success.</h2>
+                <h2>Ctrl+S your digital legacy</h2>
                 <br />
-                <p>Unite in learning.</p>
+                <p>Draft a Digital Will for peace of mind.</p>
               </label>
           </div>
         </div>
-        <div className="login-content">
+      <div className="login-content">
           <div className="overlay">
             <div className="login-content1">
               <h1>Welcome Back!</h1>
               <p>Please login to continue.</p>
               <div className="auth-form">
                 <h2>Login</h2>
-                <form onSubmit={handleLogin}>
+                <form onSubmit={handleSubmit}>
                   <label>
                     <input
                       type="text"
-                      placeholder="Username"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                    />
+                      placeholder="Email"
+                      name='email'
+                      onChange={handleChange}
+                      />
                   </label>
                   <label>
                     <input
                       type="password"
                       placeholder="Password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
+                      name='password'
+                      onChange={handleChange}
+                      />
                   </label>
                   <Link to="/register">
                     <p id="account">Don't you have an account?</p>
                   </Link>
                   <br />
+                  <button onClick={loginform}>Login with Github</button>
                   <button type="submit">Login</button>
                 </form>
               </div>
             </div>
           </div>
         </div>
-        {/* Include your Footer component here */}
+        <Footer />
       </div>
     </>
   );

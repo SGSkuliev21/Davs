@@ -8,7 +8,7 @@ function Footer() {
   };
   return (
     <footer style={footerStyle}>
-      <p>&copy; {new Date().getFullYear()} SHS. All rights reserved.</p>
+      <p>&copy; {new Date().getFullYear()} DAVS. All rights reserved.</p>
     </footer>
   );
 }

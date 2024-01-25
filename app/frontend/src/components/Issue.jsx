@@ -159,7 +159,7 @@ class Issue extends Component {
           style={customStyles}
         >
           <div className="Modal">
-            <h2>{formData.id ? 'Edit' : 'Add'} a Blog Post</h2>
+            <h2>{formData.id ? 'Edit' : 'Add'} a Digital Will</h2>
             <br />
             <form>
               <input

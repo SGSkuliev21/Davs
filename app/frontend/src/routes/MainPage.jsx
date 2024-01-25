@@ -7,6 +7,7 @@ import Profile from '../components/Profile';
 function MainPage() {
 
   const navigation = useNavigate();
+  
 
 
   const containerStyle = {
@@ -34,7 +35,7 @@ function MainPage() {
           <ul>    
             <li>
               <Link to="#" onClick={toggleIssue}>
-                <h2>My Issues</h2>
+                <h2>Wills</h2>
               </Link>
               <hr>
               </hr>
@@ -45,7 +46,7 @@ function MainPage() {
           </ul>
         </div>
         {showIssue && <Issue />}
-        {showProfile && <Profile />}
+        {showProfile && <Profile/>}
       </div>
       <Footer />
     </div>
