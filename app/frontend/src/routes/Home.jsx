@@ -9,7 +9,9 @@ function HomePage() {
   const section2Ref = useRef(null);
   const section3Ref = useRef(null);
 
-
+  const openGitHubRepository = () => {
+    window.open('https://github.com/SGSkuliev21/Davs', '_blank');
+  };
 
   const handleClick_section1 = () => {
     if (section1Ref.current) {
@@ -98,7 +100,7 @@ function HomePage() {
           <br></br>
           <hr></hr>
           <p>To download a file or software, follow these simple steps. Begin by visiting the official website or trusted source where the item is available. Once on the website, locate the designated download section or button, which is typically labeled as "Download" or something similar.</p>
-          <Link to="/"><button type="button">Donwload</button></Link>
+         <button type="button" onClick={openGitHubRepository}>Donwload</button>
         </div>
       </section>
       
